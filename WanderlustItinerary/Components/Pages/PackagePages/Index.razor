@@ -1,0 +1,44 @@
+﻿@page "/packages"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using WanderlustItinerary.Domain
+@using WanderlustItinerary.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
+@attribute [Authorize(Roles = "Administrator")]
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="packages/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Package">
+    <PropertyColumn Property="package => package.PackageName" />
+    <PropertyColumn Property="package => package.Description" />
+    <PropertyColumn Property="package => package.Price" />
+    <PropertyColumn Property="package => package.DateCreated" />
+    <PropertyColumn Property="package => package.DateUpdated" />
+    <PropertyColumn Property="package => package.CreatedBy" />
+    <PropertyColumn Property="package => package.UpdatedBy" />
+
+    <TemplateColumn Context="package">
+        <a href="@($"packages/edit?id={package.Id}")">Edit</a> |
+        <a href="@($"packages/details?id={package.Id}")">Details</a> |
+        <a href="@($"packages/delete?id={package.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private WanderlustItineraryContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

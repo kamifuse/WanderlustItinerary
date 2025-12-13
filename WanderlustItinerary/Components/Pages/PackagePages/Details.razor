@@ -1,0 +1,60 @@
+﻿@page "/packages/details"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using WanderlustItinerary.Domain
+@inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Administrator")]
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Package</h2>
+    <hr />
+    @if (package is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">PackageName</dt>
+            <dd class="col-sm-10">@package.PackageName</dd>
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@package.Description</dd>
+            <dt class="col-sm-2">Price</dt>
+            <dd class="col-sm-10">@package.Price</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@package.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@package.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@package.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@package.UpdatedBy</dd>
+        </dl>
+        <div>
+            <a href="@($"/packages/edit?id={package.Id}")">Edit</a> |
+            <a href="@($"/packages")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Package? package;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        package = await context.Package.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (package is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

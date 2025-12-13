@@ -1,0 +1,81 @@
+﻿@page "/packages/delete"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using WanderlustItinerary.Domain
+@inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Administrator")]
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Package</h2>
+    <hr />
+    @if (package is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">PackageName</dt>
+            <dd class="col-sm-10">@package.PackageName</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@package.Description</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Price</dt>
+            <dd class="col-sm-10">@package.Price</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@package.DateCreated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@package.DateUpdated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@package.CreatedBy</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@package.UpdatedBy</dd>
+        </dl>
+        <EditForm method="post" Model="package" OnValidSubmit="DeletePackage" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(package is null)">Delete</button> |
+            <a href="/packages">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Package? package;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        package = await context.Package.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (package is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeletePackage()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Package.Remove(package!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/packages");
+    }
+}

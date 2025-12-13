@@ -1,0 +1,96 @@
+﻿@page "/bookings/details"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using WanderlustItinerary.Domain
+@inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<IdentityUser> UserManager
+
+@attribute [Authorize]
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Booking</h2>
+    <hr />
+    @if (booking is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-2">UserId</dt>
+            <dd class="col-sm-10">@booking.UserId</dd>
+
+            <dt class="col-sm-2">Package</dt>
+            <dd class="col-sm-10">@booking.Package?.PackageName</dd>
+
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10">@booking.Date</dd>
+
+            <dt class="col-sm-2">NumPax</dt>
+            <dd class="col-sm-10">@booking.NumPax</dd>
+
+            <dt class="col-sm-2">Status</dt>
+            <dd class="col-sm-10">@booking.Status</dd>
+
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@booking.DateCreated</dd>
+
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@booking.DateUpdated</dd>
+
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@booking.CreatedBy</dd>
+
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@booking.UpdatedBy</dd>
+        </dl>
+
+        <div>
+            @if (CanEdit)
+            {
+                <a href="@($"/bookings/edit?id={booking.Id}")">Edit</a>
+                <span> | </span>
+            }
+            <a href="/bookings">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Booking? booking;
+    private bool CanEdit = false;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        booking = await context.Booking
+            .Include(b => b.Package)
+            .FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (booking is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+            return;
+        }
+
+      
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var isAdmin = user.IsInRole("Administrator");
+        var userId = UserManager.GetUserId(user);
+
+        CanEdit = isAdmin || booking.CreatedBy == userId;
+    }
+}
+

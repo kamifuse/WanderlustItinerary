@@ -1,0 +1,96 @@
+﻿@page "/bookings/create"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using WanderlustItinerary.Domain
+@inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<IdentityUser> UserManager
+
+@attribute [Authorize]
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Booking</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Booking" OnValidSubmit="AddBooking" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <div class="mb-3">
+                <label for="packageid" class="form-label">Package:</label>
+                <InputSelect id="packageid" @bind-Value="Booking.PackageId" class="form-control">
+                    <option value="">-- Select Package --</option>
+                    @foreach (var p in Packages)
+                    {
+                        <option value="@p.Id">@p.PackageName</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Booking.PackageId" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="date" class="form-label">Date:</label>
+                <InputDate id="date" @bind-Value="Booking.Date" class="form-control" />
+                <ValidationMessage For="() => Booking.Date" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="numpax" class="form-label">NumPax:</label>
+                <InputNumber id="numpax" @bind-Value="Booking.NumPax" class="form-control" />
+                <ValidationMessage For="() => Booking.NumPax" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="status" class="form-label">Status:</label>
+                <InputText id="status" @bind-Value="Booking.Status" class="form-control" />
+                <ValidationMessage For="() => Booking.Status" class="text-danger" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/bookings">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Booking Booking { get; set; } = new();
+
+    private List<Package> Packages { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Packages = await context.Package.ToListAsync();
+    }
+
+    private async Task AddBooking()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = UserManager.GetUserId(user);
+
+        // Auto-fill user + audit fields (Week 7 style)
+        Booking.UserId = userId;
+        Booking.CreatedBy = userId;
+        Booking.UpdatedBy = userId;
+        Booking.DateCreated = DateTime.Now;
+        Booking.DateUpdated = DateTime.Now;
+
+        context.Booking.Add(Booking);
+        await context.SaveChangesAsync();
+
+        NavigationManager.NavigateTo("/bookings");
+    }
+}

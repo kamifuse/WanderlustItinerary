@@ -1,0 +1,121 @@
+﻿@page "/packages/edit"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using WanderlustItinerary.Domain
+@inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Administrator")]
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Package</h2>
+<hr />
+@if (Package is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Package" OnValidSubmit="UpdatePackage" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Package.Id" value="@Package.Id" />
+                <div class="mb-3">
+                    <label for="packagename" class="form-label">PackageName:</label>
+                    <InputText id="packagename" @bind-Value="Package.PackageName" class="form-control" />
+                    <ValidationMessage For="() => Package.PackageName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <InputText id="description" @bind-Value="Package.Description" class="form-control" />
+                    <ValidationMessage For="() => Package.Description" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price:</label>
+                    <InputNumber id="price" @bind-Value="Package.Price" class="form-control" />
+                    <ValidationMessage For="() => Package.Price" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="Package.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => Package.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="Package.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => Package.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="Package.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => Package.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="Package.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => Package.UpdatedBy" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/packages">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Package? Package { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Package ??= await context.Package.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Package is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdatePackage()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Package!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!PackageExists(Package!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/packages");
+    }
+
+    private bool PackageExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Package.Any(e => e.Id == id);
+    }
+}

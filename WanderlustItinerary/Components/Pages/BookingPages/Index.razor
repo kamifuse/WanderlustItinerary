@@ -1,0 +1,65 @@
+﻿@page "/bookings"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using WanderlustItinerary.Domain
+@using WanderlustItinerary.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<IdentityUser> UserManager
+
+@attribute [Authorize]
+
+<PageTitle>Bookings</PageTitle>
+
+<h1>Bookings</h1>
+
+<p>
+    <a href="bookings/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="filteredBookings">
+    <PropertyColumn Property="booking => booking.Package!.PackageName" Title="Package" />
+    <PropertyColumn Property="booking => booking.Date" />
+    <PropertyColumn Property="booking => booking.NumPax" />
+    <PropertyColumn Property="booking => booking.Status" />
+
+    <TemplateColumn Context="booking">
+        <a href="@($"bookings/edit?id={booking.Id}")">Edit</a> |
+        <a href="@($"bookings/details?id={booking.Id}")">Details</a>
+
+        <AuthorizeView Roles="Administrator">
+            | <a href="@($"bookings/delete?id={booking.Id}")">Delete</a>
+        </AuthorizeView>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private WanderlustItineraryContext context = default!;
+    private IQueryable<Booking> filteredBookings = Enumerable.Empty<Booking>().AsQueryable();
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var isAdmin = user.IsInRole("Administrator");
+        var userId = UserManager.GetUserId(user);
+
+        IQueryable<Booking> query = context.Booking
+            .Include(b => b.Package);
+
+        if (!isAdmin)
+        {
+            query = query.Where(b => b.CreatedBy == userId);
+        }
+
+        filteredBookings = query;
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
