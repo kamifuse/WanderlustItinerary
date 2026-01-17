@@ -1,15 +1,15 @@
 ﻿@page "/explore"
 
-
-
 @attribute [Authorize]
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using WanderlustItinerary.Domain
 @using WanderlustItinerary.Data
+@using Microsoft.AspNetCore.Components.Web
+@rendermode InteractiveServer
+
 
 @inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
-
 
 <header class="relative bg-white pt-16 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
     <div class="relative z-10 max-w-7xl mx-auto text-center">
@@ -20,12 +20,15 @@
             Explore our curated selection of breathtaking destinations and expertly crafted itineraries.
         </p>
 
-       
+        <!-- SEARCH BAR -->
         <div class="bg-white p-2 rounded-2xl shadow-soft max-w-4xl mx-auto flex flex-col md:flex-row gap-2 border border-gray-100">
             <div class="flex-1 flex items-center px-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-gray-100">
                 <span class="material-icons text-gray-400 mr-3">search</span>
                 <input class="w-full bg-transparent border-none focus:ring-0 text-slate-700 placeholder-gray-400"
-                       placeholder="Where do you want to go?" @bind="searchText" />
+                       placeholder="Where do you want to go?"
+                       @bind="searchText"
+                       @bind:event="oninput"
+                       @onkeydown="OnKeyDown" />
             </div>
             <button class="bg-primary hover:bg-sky-600 text-white px-8 py-3 rounded-xl font-bold transition shadow-md"
                     @onclick="ApplySearch">
@@ -52,8 +55,7 @@
             @foreach (var p in FilteredPackages)
             {
                 <div class="group bg-white rounded-2xl overflow-hidden shadow-soft hover:shadow-soft-hover transition-all duration-300 border border-gray-100 flex flex-col">
-
-                    <!-- Simple banner (no real image since model doesn't have one) -->
+                    <!-- Simple banner -->
                     <div class="h-32 bg-gradient-to-r from-sky-400 to-indigo-500"></div>
 
                     <div class="p-6 flex flex-col flex-grow">
@@ -73,18 +75,15 @@
                                 </p>
                             </div>
 
-                            <!-- If BaseDomainModel has Id, this should work; otherwise we can adjust -->
                             <a class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg text-primary bg-sky-50 hover:bg-sky-100 transition-colors"
                                href="@($"/package-details?id={p.Id}")">
                                 View Details
                             </a>
-
                         </div>
                     </div>
                 </div>
             }
         </div>
-
     }
 </main>
 
@@ -92,13 +91,16 @@
     private List<Package> AllPackages = new();
     private List<Package> FilteredPackages = new();
     private bool Loaded = false;
-    private string? searchText;
+    private string searchText = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         using var context = await DbFactory.CreateDbContextAsync();
 
+        // load all packages from DB once
         AllPackages = await context.Package.ToListAsync();
+
+        // initial view = all
         FilteredPackages = AllPackages;
 
         Loaded = true;
@@ -109,18 +111,24 @@
         if (string.IsNullOrWhiteSpace(searchText))
         {
             FilteredPackages = AllPackages;
-            return;
         }
+        else
+        {
+            var term = searchText.Trim().ToLower();
 
-        var term = searchText.Trim().ToLower();
-
-        FilteredPackages = AllPackages
-            .Where(p =>
-                (!string.IsNullOrEmpty(p.PackageName) && p.PackageName.ToLower().Contains(term)) ||
-                (!string.IsNullOrEmpty(p.Description) && p.Description.ToLower().Contains(term)))
-            .ToList();
+            FilteredPackages = AllPackages
+                .Where(p =>
+                    (!string.IsNullOrEmpty(p.PackageName) && p.PackageName.ToLower().Contains(term)) ||
+                    (!string.IsNullOrEmpty(p.Description) && p.Description.ToLower().Contains(term)))
+                .ToList();
+        }
     }
-}
 
-
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            ApplySearch();
+        }
+    }
 }

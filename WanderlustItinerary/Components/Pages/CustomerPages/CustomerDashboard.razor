@@ -36,14 +36,17 @@ else
                     </div>
 
                     <div class="hidden sm:flex items-center gap-6">
-                        <a class="text-sm font-medium text-sky-700" href="/dashboard">Dashboard</a>
+                        <!-- fixed to /customer/dashboard -->
+                        <a class="text-sm font-medium text-sky-700" href="/customer/dashboard">Dashboard</a>
                         <a class="text-sm font-medium text-gray-600 hover:text-gray-900" href="/explore">Packages</a>
                         <a class="text-sm font-medium text-gray-600 hover:text-gray-900" href="/bookings">My Bookings</a>
 
-                        <button class="bg-sky-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-sky-700"
-                                @onclick="GoToExplore">
+                        <a href="/bookings/create"
+                           class="bg-sky-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-sky-700 inline-flex items-center justify-center">
                             New Booking
-                        </button>
+                        </a>
+
+
                     </div>
                 </div>
             </div>
@@ -148,10 +151,12 @@ else
                                         <div class="font-semibold">@b.Package?.PackageName</div>
                                         <div class="text-sm text-gray-500">@b.Date.ToString("dd MMM yyyy") • @b.NumPax pax • @b.Status</div>
                                     </div>
-                                    <button class="text-sky-700 text-sm font-medium hover:underline"
-                                            @onclick="() => OpenBookingDetails(b.Id)">
+
+                                    <!-- changed to anchor link -->
+                                    <a href="@($"/bookings/details?id={b.Id}")"
+                                       class="text-sky-700 text-sm font-medium hover:underline">
                                         Details
-                                    </button>
+                                    </a>
                                 </div>
                             }
                         }
@@ -180,10 +185,12 @@ else
                                                 <div class="font-semibold text-sky-700">@b.Package?.PackageName</div>
                                                 <div class="text-sm text-gray-500">@b.Date.ToString("dd MMM yyyy") • @b.NumPax pax</div>
                                             </div>
-                                            <button class="text-sky-700 text-sm font-medium hover:underline"
-                                                    @onclick="() => OpenBookingDetails(b.Id)">
+
+                                            <!-- changed to anchor link -->
+                                            <a href="@($"/bookings/details?id={b.Id}")"
+                                               class="text-sky-700 text-sm font-medium hover:underline">
                                                 Details
-                                            </button>
+                                            </a>
                                         </li>
                                     }
                                 </ul>
@@ -222,9 +229,11 @@ else
                             </div>
                         </div>
 
-                        <button class="w-full mt-5 bg-sky-50 text-sky-700 font-medium py-2 rounded-md hover:bg-sky-100">
+                        <a href="/customer/profile/edit"
+                           class="w-full mt-5 bg-sky-50 text-sky-700 font-medium py-2 rounded-md hover:bg-sky-100 inline-flex items-center justify-center">
                             Edit Profile
-                        </button>
+                        </a>
+
                     </div>
                 </div>
 
@@ -304,8 +313,9 @@ else
 
     private void GoHome() => Nav.NavigateTo("/");
 
-    private void GoToExplore() => Nav.NavigateTo("/explore");
 
+
+    // OpenBookingDetails kept for reuse elsewhere if needed
     private void OpenBookingDetails(int id)
     {
         Nav.NavigateTo($"/bookings/details?id={id}");

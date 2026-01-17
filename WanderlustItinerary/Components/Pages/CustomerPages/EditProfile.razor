@@ -1,0 +1,190 @@
+﻿@page "/customer/profile/edit"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject UserManager<IdentityUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+
+@attribute [Authorize]
+
+<PageTitle>Edit Profile</PageTitle>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+
+        <!-- HEADER -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">Edit Profile</h1>
+                <p class="text-sm text-gray-500 mt-1">
+                    Manage your personal information.
+                </p>
+            </div>
+
+            <!-- Make Back a normal link (most reliable) -->
+            <a href="/customer/dashboard"
+               class="text-sm text-gray-600 hover:text-gray-900">
+                Back
+            </a>
+        </div>
+
+        @if (!Loaded)
+        {
+            <p class="text-gray-500">Loading...</p>
+        }
+        else
+        {
+            <EditForm Model="Form"
+                      OnValidSubmit="SaveChanges"
+                      FormName="editProfile"
+                      method="post"
+                      Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-red-600 mb-4" />
+
+                <!-- FORM -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- FULL NAME (UI ONLY) -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-semibold text-gray-700">
+                            Full Name
+                        </label>
+                        <InputText class="w-full rounded-lg border-gray-300 p-3 text-sm"
+                                   @bind-Value="Form.FullName"
+                                   placeholder="Enter your full name" />
+                        <p class="text-xs text-gray-400">(Not persisted yet)</p>
+                    </div>
+
+                    <!-- EMAIL (READ ONLY) -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-semibold text-gray-700">
+                            Email Address
+                        </label>
+                        <input class="w-full rounded-lg border-gray-300 bg-gray-100 p-3 text-sm text-gray-500"
+                               value="@Form.Email"
+                               disabled />
+                    </div>
+
+                    <!-- PHONE -->
+                    <div class="flex flex-col gap-2 md:col-span-2">
+                        <label class="text-sm font-semibold text-gray-700">
+                            Phone Number
+                        </label>
+                        <InputText class="w-full rounded-lg border-gray-300 p-3 text-sm"
+                                   @bind-Value="Form.PhoneNumber"
+                                   placeholder="+65 9xxxxxxx" />
+                    </div>
+
+                    <!-- BIO (UI ONLY) -->
+                    <div class="flex flex-col gap-2 md:col-span-2">
+                        <label class="text-sm font-semibold text-gray-700">
+                            Bio
+                        </label>
+                        <InputTextArea class="w-full rounded-lg border-gray-300 p-3 text-sm resize-none"
+                                       rows="4"
+                                       @bind-Value="Form.Bio"
+                                       placeholder="Tell us about your travel style..." />
+                        <p class="text-xs text-gray-400">(Not persisted yet)</p>
+                    </div>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="flex justify-end gap-4 border-t border-gray-200 pt-6 mt-8">
+                    <!-- Cancel should NOT submit -->
+                    <a href="/customer/dashboard"
+                       class="px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 inline-flex items-center justify-center">
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="px-8 py-2 rounded-lg bg-sky-600 text-white font-semibold hover:bg-sky-700">
+                        Save Changes
+                    </button>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(SuccessMessage))
+                {
+                    <div class="mt-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">
+                        @SuccessMessage
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                {
+                    <div class="mt-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+                        @ErrorMessage
+                    </div>
+                }
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    private bool Loaded;
+    private string? SuccessMessage;
+    private string? ErrorMessage;
+
+    private ProfileForm Form { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user == null)
+        {
+            Nav.NavigateTo("/Identity/Account/Login", true);
+            return;
+        }
+
+        Form.Email = user.Email ?? "";
+        Form.PhoneNumber = user.PhoneNumber ?? "";
+
+        // UI-only fields for now
+        Form.FullName = user.UserName ?? "";
+        Form.Bio = "";
+
+        Loaded = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        SuccessMessage = null;
+        ErrorMessage = null;
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user == null)
+        {
+            ErrorMessage = "User not found. Please login again.";
+            return;
+        }
+
+        user.PhoneNumber = Form.PhoneNumber;
+
+        var result = await UserManager.UpdateAsync(user);
+
+        if (result.Succeeded)
+        {
+            SuccessMessage = "Profile updated successfully.";
+        }
+        else
+        {
+            ErrorMessage = string.Join(" | ", result.Errors.Select(e => e.Description));
+        }
+    }
+
+    public class ProfileForm
+    {
+        public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string PhoneNumber { get; set; } = "";
+        public string Bio { get; set; } = "";
+    }
+}

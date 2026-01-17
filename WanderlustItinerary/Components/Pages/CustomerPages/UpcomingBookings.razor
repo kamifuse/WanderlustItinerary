@@ -1,6 +1,17 @@
 ﻿@page "/customer/bookings"
-@inject NavigationManager Nav
 
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using WanderlustItinerary.Domain
+@using WanderlustItinerary.Data
+
+@inject NavigationManager Nav
+@inject IDbContextFactory<WanderlustItineraryContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<IdentityUser> UserManager
+
+@attribute [Authorize]
 
 <section>
     <div class="flex items-center justify-between mb-4">
@@ -9,101 +20,155 @@
         </h3>
 
         <a class="text-sm font-medium text-primary hover:text-opacity-80 flex items-center cursor-pointer"
-           @onclick="@(() => Nav.NavigateTo("/customer/bookings"))">
+           @onclick="@(() => Nav.NavigateTo("/bookings"))">
             View all <span class="material-icons text-sm ml-1">arrow_forward</span>
         </a>
     </div>
 
-    <!-- Main highlighted booking card -->
-    <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 transition hover:shadow-xl group">
-        <div class="md:flex">
-            <div class="md:flex-shrink-0 relative overflow-hidden md:w-48">
-                <img class="h-48 w-full object-cover md:w-48 md:h-full transform group-hover:scale-105 transition-transform duration-500"
-                     alt="Scenic view of Kyoto traditional streets"
-                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeJX_sXaE-8IqFtIgQiv44xDB0XMr1qLUcL-w1PyaSL-FR7Lv4LQXdstTcd55xm7mHbAEoTgTnVDuuNN7XHVyorG2bK7wbVvgjNQ1w-Ca3HM8ueekHKoEJAmK_vGmvkEi5oqngyxywEk-exchliQjJNS8fNyok4gAv9p9-j663OA8vglkb27-Qyl0cinncGPOOL3hRdLy2ROykKPNMifIDE5vI6ZfZ7idRyFe9GHGhHbpuhHdEnUbhQUqL4Q-T2ypjEbzuwS1Vyu4" />
-                <div class="absolute top-0 left-0 m-2 bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wide">
-                    Confirmed
-                </div>
-            </div>
+    @if (!Loaded)
+    {
+        <div class="bg-card-light dark:bg-card-dark rounded-lg shadow border border-gray-100 dark:border-gray-700 p-6">
+            <p class="text-muted-light dark:text-muted-dark">Loading your bookings…</p>
+        </div>
+    }
+    else if (Bookings.Count == 0)
+    {
+        <div class="bg-card-light dark:bg-card-dark rounded-lg shadow border border-gray-100 dark:border-gray-700 p-6">
+            <p class="text-muted-light dark:text-muted-dark">No upcoming bookings yet.</p>
 
-            <div class="p-6 w-full flex flex-col justify-between">
-                <div>
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <div class="uppercase tracking-wide text-sm text-primary font-bold">
-                                Cultural Heritage Tour
+            <button class="mt-4 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition shadow-sm"
+                    @onclick="@(() => Nav.NavigateTo("/explore"))">
+                Browse packages
+            </button>
+        </div>
+    }
+    else
+    {
+        var main = Bookings[0];
+
+        <!-- Main highlighted booking card -->
+        <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 transition hover:shadow-xl group">
+            <div class="md:flex">
+                <div class="md:flex-shrink-0 relative overflow-hidden md:w-48">
+                    <img class="h-48 w-full object-cover md:w-48 md:h-full transform group-hover:scale-105 transition-transform duration-500"
+                         alt="Package image"
+                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeJX_sXaE-8IqFtIgQiv44xDB0XMr1qLUcL-w1PyaSL-FR7Lv4LQXdstTcd55xm7mHbAEoTgTnVDuuNN7XHVyorG2bK7wbVvgjNQ1w-Ca3HM8ueekHKoEJAmK_vGmvkEi5oqngyxywEk-exchliQjJNS8fNyok4gAv9p9-j663OA8vglkb27-Qyl0cinncGPOOL3hRdLy2ROykKPNMifIDE5vI6ZfZ7idRyFe9GHGhHbpuhHdEnUbhQUqL4Q-T2ypjEbzuwS1Vyu4" />
+
+                    <div class="absolute top-0 left-0 m-2 text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wide
+                                    @(main.Status == "Confirmed"
+                                                             ? "bg-green-100 text-green-800"
+                                                             : main.Status == "Pending"
+                                                                 ? "bg-yellow-100 text-yellow-800"
+                                                                 : "bg-slate-200 text-slate-800")">
+                        @main.Status
+                    </div>
+                </div>
+
+                <div class="p-6 w-full flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="uppercase tracking-wide text-sm text-primary font-bold">
+                                    @main.Package?.PackageName
+                                </div>
+                                <h4 class="block mt-1 text-2xl leading-tight font-bold text-text-light dark:text-text-dark">
+                                    @main.Package?.PackageName
+                                </h4>
                             </div>
-                            <h4 class="block mt-1 text-2xl leading-tight font-bold text-text-light dark:text-text-dark hover:underline">
-                                Kyoto, Japan
-                            </h4>
+
+                            <div class="text-right hidden sm:block">
+                                <p class="text-xs text-muted-light dark:text-muted-dark">Booking status</p>
+                                <p class="text-lg font-bold text-text-light dark:text-text-dark">@main.Status</p>
+                            </div>
                         </div>
 
-                        <div class="text-right hidden sm:block">
-                            <p class="text-2xl font-bold text-text-light dark:text-text-dark">$1,299</p>
-                            <p class="text-xs text-muted-light dark:text-muted-dark">Paid in full</p>
-                        </div>
-                    </div>
+                        <div class="mt-4 flex flex-wrap gap-4 text-sm text-muted-light dark:text-muted-dark">
+                            <div class="flex items-center">
+                                <span class="material-icons text-gray-400 mr-1 text-lg">calendar_today</span>
+                                @main.Date.ToString("dd/MM/yyyy")
+                            </div>
 
-                    <p class="mt-2 text-muted-light dark:text-muted-dark">
-                        Experience the ancient temples, traditional tea ceremonies, and breathtaking bamboo forests.
-                    </p>
+                            <div class="flex items-center">
+                                <span class="material-icons text-gray-400 mr-1 text-lg">people</span>
+                                @main.NumPax pax
+                            </div>
 
-                    <div class="mt-4 flex flex-wrap gap-4 text-sm text-muted-light dark:text-muted-dark">
-                        <div class="flex items-center">
-                            <span class="material-icons text-gray-400 mr-1 text-lg">calendar_today</span>
-                            Oct 15 - Oct 22, 2023
-                        </div>
-                        <div class="flex items-center">
-                            <span class="material-icons text-gray-400 mr-1 text-lg">people</span>
-                            2 Adults
-                        </div>
-                        <div class="flex items-center">
-                            <span class="material-icons text-gray-400 mr-1 text-lg">confirmation_number</span>
-                            #WL-88329
+                            <div class="flex items-center">
+                                <span class="material-icons text-gray-400 mr-1 text-lg">confirmation_number</span>
+                                #@main.Id
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="mt-6 flex space-x-3">
-                    <button class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition shadow-sm"
-                            @onclick="@(() => Nav.NavigateTo("/customer/itinerary/WL-88329"))">
-                        View Itinerary
-                    </button>
+                    <div class="mt-6 flex space-x-3">
+                        <button class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition shadow-sm"
+                                @onclick="@(() => Nav.NavigateTo($"/bookings/details?id={main.Id}"))">
+                            View Details
+                        </button>
 
-                    <button class="bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                            @onclick="@(() => Nav.NavigateTo("/customer/ticket/WL-88329"))">
-                        Download Ticket
-                    </button>
+                        <button class="bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                @onclick="@(() => Nav.NavigateTo($"/bookings/edit?id={main.Id}"))">
+                            Edit
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Secondary booking row -->
-    <div class="mt-4 bg-card-light dark:bg-card-dark rounded-lg shadow border border-gray-100 dark:border-gray-700 p-4 flex flex-col sm:flex-row items-center justify-between">
-        <div class="flex items-center w-full sm:w-auto mb-4 sm:mb-0">
-            <div class="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 mr-4">
-                <span class="material-icons">flight</span>
+        <!-- Secondary booking rows -->
+        @foreach (var b in Bookings.Skip(1))
+        {
+            <div class="mt-4 bg-card-light dark:bg-card-dark rounded-lg shadow border border-gray-100 dark:border-gray-700 p-4 flex flex-col sm:flex-row items-center justify-between">
+                <div class="flex items-center w-full sm:w-auto mb-4 sm:mb-0">
+                    <div class="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 mr-4">
+                        <span class="material-icons">flight</span>
+                    </div>
+                    <div>
+                        <h5 class="text-md font-bold text-text-light dark:text-text-dark">@b.Package?.PackageName</h5>
+                        <p class="text-sm text-muted-light dark:text-muted-dark">
+                            @b.Date.ToString("dd/MM/yyyy") •
+                            <span class="font-medium">@b.NumPax pax</span> •
+                            <span class="@(b.Status == "Pending" ? "text-yellow-600 dark:text-yellow-400" : "text-green-600 dark:text-green-400") font-medium">
+                                @b.Status
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center w-full sm:w-auto justify-end">
+                    <button class="text-sm text-primary font-medium hover:underline mr-4"
+                            @onclick="@(() => Nav.NavigateTo($"/bookings/details?id={b.Id}"))">
+                        Details
+                    </button>
+
+                    <button class="bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600"
+                            @onclick="@(() => Nav.NavigateTo($"/bookings/edit?id={b.Id}"))">
+                        Edit
+                    </button>
+                </div>
             </div>
-            <div>
-                <h5 class="text-md font-bold text-text-light dark:text-text-dark">Weekend in Paris</h5>
-                <p class="text-sm text-muted-light dark:text-muted-dark">
-                    Nov 10 - Nov 12, 2023 •
-                    <span class="text-yellow-600 dark:text-yellow-400 font-medium">Payment Pending</span>
-                </p>
-            </div>
-        </div>
-
-        <div class="flex items-center w-full sm:w-auto justify-end">
-            <button class="text-sm text-primary font-medium hover:underline mr-4"
-                    @onclick="@(() => Nav.NavigateTo("/customer/bookings"))">
-                Manage
-            </button>
-
-            <button class="bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600"
-                    @onclick="@(() => Nav.NavigateTo("/customer/payments"))">
-                Pay Now
-            </button>
-        </div>
-    </div>
+        }
+    }
 </section>
+
+@code {
+    private bool Loaded = false;
+    private List<Booking> Bookings = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = UserManager.GetUserId(user);
+
+        Bookings = await context.Booking
+            .Include(b => b.Package)
+            .Where(b => b.CreatedBy == userId)
+            .OrderBy(b => b.Date)
+            .ToListAsync();
+
+        Loaded = true;
+    }
+}
