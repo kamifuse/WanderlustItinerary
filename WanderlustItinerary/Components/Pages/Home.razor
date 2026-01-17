@@ -2,6 +2,331 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="bg-background-light dark:bg-background-dark font-display text-[#111618] dark:text-white transition-colors duration-300">
+    <div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
 
-Welcome to your new app.
+            <!-- Top Navigation Bar -->
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#f0f3f4] dark:border-[#2a353b] bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-10 py-3 sticky top-0 z-50">
+                <div class="flex items-center gap-4 text-[#111618] dark:text-white">
+                    <div class="size-6 text-primary">
+                        <span class="material-symbols-outlined text-3xl">explore</span>
+                    </div>
+                    <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Wanderlust</h2>
+                </div>
+                <div class="flex flex-1 justify-end gap-8">
+                    <nav class="flex items-center gap-9">
+                        <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="/explore">Destinations</a>
+                        <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="/packages">Experiences</a>
+                        <a class="text-sm font-medium leading-normal hover:text-primary transition-colors" href="/about">About</a>
+                    </nav>
+                    <a href="Identity/Account/Login"
+                       class="flex min-w-[100px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:brightness-110 transition-all shadow-sm">
+                        <span>Sign In</span>
+                    </a>
+                </div>
+            </header>
+
+            <main class="flex flex-col flex-1">
+                <!-- Hero Section -->
+                <div class="px-4 sm:px-10 xl:px-40 py-5">
+                    <div class="container mx-auto">
+                        <div class="sm:p-4">
+                            <div class="flex min-h-[580px] flex-col gap-8 bg-cover bg-center bg-no-repeat rounded-none sm:rounded-xl items-center justify-center p-6 text-center"
+                                 data-alt="Wide shot of a mountain lake landscape"
+                                 style='background-image: linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDPtkuIzVh3t8Gq_Q6Bqpd4LkVXdzZV15uzMZkAOEX2pwrOmCtcGQ1fBURAeUp3ZoVXWM0FCjexxKAXsGRIjNxrY5lbT5TlncDxzEUeSX8X1uWD2zLW6lkdHGhbY3XdxK1iydyIfRGVsFH_gyCO5eJPpbuJg-NJJnS86-YJCNRZU1Kx7J-PY1W6yrPT8-EpvU7y7gIHDe1muhSyrHcqfHo8Qi4l2rnNiHFeFL-1cog9TIdUE4M0X8tOL3KohRiCFY5xKGS-h24JuMU");'>
+                                <div class="flex flex-col gap-4 max-w-[800px]">
+                                    <h1 class="text-white text-5xl font-extrabold leading-tight tracking-[-0.033em] sm:text-7xl">
+                                        Explore the World with Wanderlust
+                                    </h1>
+                                    <p class="text-white text-lg font-medium leading-normal opacity-90 sm:text-xl">
+                                        Personalized itineraries for your next big adventure. From hidden gems to bucket-list icons.
+                                    </p>
+                                </div>
+                                <!-- Integrated Search Bar -->
+                                <div class="w-full max-w-[900px] bg-white dark:bg-background-dark p-2 rounded-xl shadow-2xl flex flex-col md:flex-row gap-2 mt-4 items-center">
+                                    <div class="flex flex-1 items-center px-4 py-2 gap-3 border-r border-gray-100 dark:border-gray-800 w-full">
+                                        <span class="material-symbols-outlined text-primary">location_on</span>
+                                        <div class="flex flex-col items-start w-full">
+                                            <span class="text-[10px] uppercase font-bold text-gray-400">Destination</span>
+                                            <input class="w-full border-none focus:ring-0 p-0 text-sm font-semibold bg-transparent dark:text-white placeholder:text-gray-400"
+                                                   placeholder="Where to next?" type="text" />
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-1 items-center px-4 py-2 gap-3 border-r border-gray-100 dark:border-gray-800 w-full">
+                                        <span class="material-symbols-outlined text-primary">calendar_month</span>
+                                        <div class="flex flex-col items-start w-full">
+                                            <span class="text-[10px] uppercase font-bold text-gray-400">Dates</span>
+                                            <input class="w-full border-none focus:ring-0 p-0 text-sm font-semibold bg-transparent dark:text-white placeholder:text-gray-400"
+                                                   placeholder="Add dates" type="text" />
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-1 items-center px-4 py-2 gap-3 w-full">
+                                        <span class="material-symbols-outlined text-primary">group</span>
+                                        <div class="flex flex-col items-start w-full">
+                                            <span class="text-[10px] uppercase font-bold text-gray-400">Travelers</span>
+                                            <input class="w-full border-none focus:ring-0 p-0 text-sm font-semibold bg-transparent dark:text-white placeholder:text-gray-400"
+                                                   placeholder="2 Adults" type="text" />
+                                        </div>
+                                    </div>
+                                    <button class="bg-primary hover:brightness-110 text-white px-8 py-4 rounded-lg font-bold w-full md:w-auto transition-all flex items-center justify-center gap-2">
+                                        <span class="material-symbols-outlined">search</span>
+                                        Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trending Destinations Section -->
+                <div class="px-4 sm:px-10 xl:px-40 py-10">
+                    <div class="max-w-[1280px] mx-auto">
+                        <div class="flex justify-between items-end px-4 mb-6">
+                            <div>
+                                <h2 class="text-[#111618] dark:text-white text-3xl font-bold leading-tight tracking-[-0.015em]">
+                                    Trending Destinations
+                                </h2>
+                                <p class="text-gray-500 mt-1">Hand-picked locations for your next trip</p>
+                            </div>
+                            <a class="text-primary font-bold flex items-center gap-1 hover:underline" href="#">
+                                View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
+                            <!-- Card 1 -->
+                            <div class="group relative overflow-hidden rounded-xl aspect-[3/4] cursor-pointer shadow-lg transition-transform duration-300 hover:-translate-y-2">
+                                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                                     data-alt="Santorini white buildings and blue sea"
+                                     style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 50%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAoYgk94Jy2u6cjZ97imb9dkaY0RP1n9HuflxBnuxDQK9Piw0wi7mpXASHWWWd9ZOeMX1KXFQptDMWyg6IKSUiXJVPOC7OqUv4aou4Ihp1Ui68hs1rFBZW2A4JOcO0UyPidzSZA7h_xBjfS1tyL5c-Wlu1fLLAMvfKHRnagq1yH0eTmLdfWaVqCmTjVBTaxwSbdaSro38SCu1e8R52KVRa6NycToU2i5RJZ4Tcc05M-DeqO9hXg5XJw8ssah44-xTV5pgJOoRUwGV0");'>
+                                </div>
+                                <div class="absolute bottom-0 p-6 w-full">
+                                    <p class="text-white text-xl font-bold leading-tight">Santorini, Greece</p>
+                                    <p class="text-white/80 text-sm mt-1">Starting from $1,200</p>
+                                </div>
+                            </div>
+                            <!-- Card 2 -->
+                            <div class="group relative overflow-hidden rounded-xl aspect-[3/4] cursor-pointer shadow-lg transition-transform duration-300 hover:-translate-y-2">
+                                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                                     data-alt="Kyoto pagoda with cherry blossoms"
+                                     style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 50%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCj6fXOGzVSrrjE72rVuO7wKQGUwrrqn8XSRAhqxy2A7b63jfsHha5eIf0o4nGUtqDAtntr_YqlXNaXx_9k7cY66L4o4lq2sDeaCm-zK6Z_WqoTPFAEsG0lQRGDtHsqdvgm-Lhnx6Cj-cshXR2sC3IM1cBLL5DwSmY_WHsBnn2KFAHBP1Mzo5ag1kV2dO8HITk1zYcaqgkOpT3-RpUUergHc_46NtN6MBjeqQ-y2cbWWHBLu-_2nwMi-U4gbtvaPKfI2KrVdnXKK4M");'>
+                                </div>
+                                <div class="absolute bottom-0 p-6 w-full">
+                                    <p class="text-white text-xl font-bold leading-tight">Kyoto, Japan</p>
+                                    <p class="text-white/80 text-sm mt-1">Starting from $1,500</p>
+                                </div>
+                            </div>
+                            <!-- Card 3 -->
+                            <div class="group relative overflow-hidden rounded-xl aspect-[3/4] cursor-pointer shadow-lg transition-transform duration-300 hover:-translate-y-2">
+                                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                                     data-alt="Bali tropical jungle temple"
+                                     style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 50%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCq1FvhTfB17Nb4pASpeiMRL-RBBndWe3ahI-hOh_2c-rAdlWfulcCMxJ2aQO-jczcq8CCywGl2t1aqSfgVEc6xZ_08Cfi8g9mk9OSxkx0XEQyR6pFzNuMfeO3_Ofuiie4hg-JlN24Cgbsxx1hNKP9v24J_YbsGGIDMttrpDUe818QyLMefS6ul6QZx-zCnGwMJjY7FvVxzMvxvqYNwOHhemRmoYrv0vrlp2LUGC6hxXIHZ6-KDRUyH--BFRZUqMMbuuDhZPS5Q83A");'>
+                                </div>
+                                <div class="absolute bottom-0 p-6 w-full">
+                                    <p class="text-white text-xl font-bold leading-tight">Bali, Indonesia</p>
+                                    <p class="text-white/80 text-sm mt-1">Starting from $800</p>
+                                </div>
+                            </div>
+                            <!-- Card 4 -->
+                            <div class="group relative overflow-hidden rounded-xl aspect-[3/4] cursor-pointer shadow-lg transition-transform duration-300 hover:-translate-y-2">
+                                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                                     data-alt="Modern Swiss alps village view"
+                                     style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 50%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCGWrvkrmeF7ppLRyEvIJFd00vWya8OnvEOwf2IcBFbOl67muYNpADYmHwCqMN4Mjbkp-_n-hO_18RNNuHGBDOLQ_wlbyZt6O-ph55wMum14O6Pa2dt8mR77hoPGpKVk4C-Rglnezh5UJ0p9gdJ97ZNrJOVIJhVRcPQ74js11szqbDDPIz9k2VmB6t2YqpVCKBsuGC4kumKnUkMMwcdwH5aGiELNdOlaC1F70C7Hsx2WkoiPxaUp-Kksgrcb8hiDPQCcc1YwdRNzKk");'>
+                                </div>
+                                <div class="absolute bottom-0 p-6 w-full">
+                                    <p class="text-white text-xl font-bold leading-tight">Zermatt, Switzerland</p>
+                                    <p class="text-white/80 text-sm mt-1">Starting from $2,100</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Section: Why Wanderlust? -->
+                <div class="bg-white dark:bg-background-dark/30 py-20">
+                    <div class="px-4 sm:px-10 xl:px-40">
+                        <div class="max-w-[1280px] mx-auto">
+                            <div class="flex flex-col gap-4 text-center items-center mb-12">
+                                <h2 class="text-[#111618] dark:text-white text-[32px] font-extrabold leading-tight tracking-[-0.033em]">
+                                    Why Wanderlust?
+                                </h2>
+                                <p class="text-gray-500 dark:text-gray-400 text-lg max-w-[720px]">
+                                    We provide everything you need for a seamless travel experience, so you can focus on making memories.
+                                </p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                <div class="flex flex-col gap-4 rounded-xl border border-[#dbe2e6] dark:border-gray-800 bg-white dark:bg-background-dark p-8 shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="bg-primary/10 w-14 h-14 rounded-lg flex items-center justify-center text-primary">
+                                        <span class="material-symbols-outlined text-3xl">support_agent</span>
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <h3 class="text-[#111618] dark:text-white text-xl font-bold leading-tight">24/7 Global Support</h3>
+                                        <p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed">
+                                            Always here for you, no matter the time zone or the emergency. Real humans, 24/7.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 rounded-xl border border-[#dbe2e6] dark:border-gray-800 bg-white dark:bg-background-dark p-8 shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="bg-primary/10 w-14 h-14 rounded-lg flex items-center justify-center text-primary">
+                                        <span class="material-symbols-outlined text-3xl">map</span>
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <h3 class="text-[#111618] dark:text-white text-xl font-bold leading-tight">Expert Local Guides</h3>
+                                        <p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed">
+                                            Discover hidden gems and local secrets with our handpicked, certified destination experts.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4 rounded-xl border border-[#dbe2e6] dark:border-gray-800 bg-white dark:bg-background-dark p-8 shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="bg-primary/10 w-14 h-14 rounded-lg flex items-center justify-center text-primary">
+                                        <span class="material-symbols-outlined text-3xl">bed</span>
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <h3 class="text-[#111618] dark:text-white text-xl font-bold leading-tight">Handpicked Stays</h3>
+                                        <p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed">
+                                            Stay in the most unique, beautiful, and highly-rated accommodations verified by our team.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Happy Travelers Testimonials -->
+                <div class="px-4 sm:px-10 xl:px-40 py-20 overflow-hidden">
+                    <div class="max-w-[1280px] mx-auto">
+                        <h2 class="text-[#111618] dark:text-white text-3xl font-bold leading-tight text-center mb-12">
+                            Happy Travelers
+                        </h2>
+                        <div class="flex gap-6 overflow-x-auto pb-8 snap-x no-scrollbar">
+                            <!-- Testimonial 1 -->
+                            <div class="min-w-[350px] bg-white dark:bg-background-dark p-8 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm snap-center">
+                                <div class="flex text-yellow-400 mb-4">
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-300 italic mb-6">
+                                    "Wanderlust made our honeymoon in Santorini absolutely perfect. Every detail was handled, and the local guide was exceptional!"
+                                </p>
+                                <div class="flex items-center gap-4">
+                                    <div class="size-12 rounded-full bg-cover"
+                                         data-alt="User avatar portrait"
+                                         style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCE6Nf-OAGGmnF7ZwibRZizyANWuDrMVwBxeTU6nEPfi13O9vNcgPz76kH_H_fN-TuTXRw8N_6Hxvsj6uRQ0UrzlIB03fOe57qWQPltob_hE0eTOFyZGxStrL9oNufEfKudsV9KQHZdM5nSUvaDzqqIB2-GqDUt5WS29Cbd2WCzWJDXX4BZUoke-XrZmgmCeIYLzHnmG2RcSrDAgannqw3N7phIVjvKPfWjcKgta7Bnjjujq3CtZPCek6r8iC_-8A24ozpobokV5hU');"></div>
+                                    <div>
+                                        <p class="font-bold">Sarah Jenkins</p>
+                                        <p class="text-xs text-gray-400">Traveled to Greece</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Testimonial 2 -->
+                            <div class="min-w-[350px] bg-white dark:bg-background-dark p-8 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm snap-center">
+                                <div class="flex text-yellow-400 mb-4">
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-300 italic mb-6">
+                                    "The easiest booking experience I've ever had. Their expert recommendations for Kyoto restaurants were spot on!"
+                                </p>
+                                <div class="flex items-center gap-4">
+                                    <div class="size-12 rounded-full bg-cover"
+                                         data-alt="User avatar portrait"
+                                         style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAcUnLWnXglkIfUIDd7hYUJlWYVvMtDKPOoFa_KF6QRabC7Cj3CioPZCEpp4gihFikq4pCgD4Xj53OJ-Fd0-yDh_25XHCaoJiUTwZO_3WLNu3iHM7vYo3oMGMtJxoFJ2ogupMHK-flmF6RXTkJZKKcwhlyJC202EEqs82iIOzE2Chnu4hAOJnka3fS6TpHislan0GZ2jWnOz0YgZ5rNOSA6ResEy2Gb9ClEgGHy4yyPwFpZJfXasDo9tdYbGo0YQqYjoNJLPzmbEWQ');"></div>
+                                    <div>
+                                        <p class="font-bold">David Chen</p>
+                                        <p class="text-xs text-gray-400">Traveled to Japan</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Testimonial 3 -->
+                            <div class="min-w-[350px] bg-white dark:bg-background-dark p-8 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm snap-center">
+                                <div class="flex text-yellow-400 mb-4">
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                    <span class="material-symbols-outlined fill-1">star</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-300 italic mb-6">
+                                    "Incredible value and service. The support team helped us rebook everything when our flight was delayed instantly."
+                                </p>
+                                <div class="flex items-center gap-4">
+                                    <div class="size-12 rounded-full bg-cover"
+                                         data-alt="User avatar portrait"
+                                         style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBSy64FyhG_H1GXpb1uojCESUVVyTalrtofIcyaRDEiQ3Llg3QLbRyRpwB11jOLJD8d7YzbJCGKsMgJE-UhtmqJ-wHlLQXARd8qPw0rzHBQjUoDldMZbYftwiLI4NO_1fxH9VKVOM_s0VMFosQk-er6xLPOWF_BWtt7aPNFUdgbcjzBGTAX62hRTZn9bmuZI1UWEc8ZfFFtWnRDsqEGs4MJxnWMM611mqOuraGtE8fT5a_hAg2tQcwm2fZ_0_brEv2_sI2hkohrU1U');"></div>
+                                    <div>
+                                        <p class="font-bold">Emily Rodriguez</p>
+                                        <p class="text-xs text-gray-400">Traveled to Bali</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer & Newsletter -->
+            <footer class="bg-white dark:bg-background-dark border-t border-gray-100 dark:border-gray-800 pt-20 pb-10">
+                <div class="px-4 sm:px-10 xl:px-40 max-w-[1280px] mx-auto">
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-16">
+                        <div class="col-span-1 lg:col-span-1 flex flex-col gap-6">
+                            <div class="flex items-center gap-3 text-primary">
+                                <span class="material-symbols-outlined text-3xl">explore</span>
+                                <h2 class="text-xl font-bold dark:text-white">Wanderlust</h2>
+                            </div>
+                            <p class="text-gray-500 text-sm leading-relaxed">
+                                Curating extraordinary journeys for the curious traveler. Discover, book, and explore the world with ease.
+                            </p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-8 col-span-1 lg:col-span-2">
+                            <div class="flex flex-col gap-4">
+                                <h4 class="font-bold text-sm uppercase tracking-wider">Company</h4>
+                                <nav class="flex flex-col gap-2">
+                                    <a class="text-gray-500 hover:text-primary transition-colors text-sm" href="#">About Us</a>
+                                    <a class="text-gray-500 hover:text-primary transition-colors text-sm" href="#">Careers</a>
+                                    <a class="text-gray-500 hover:text-primary transition-colors text-sm" href="#">Blog</a>
+                                    <a class="text-gray-500 hover:text-primary transition-colors text-sm" href="#">Press</a>
+                                </nav>
+                            </div>
+                            <div class="flex flex-col gap-4">
+                                <h4 class="font-bold text-sm uppercase tracking-wider">Support</h4>
+                                <nav class="flex flex-col gap-2">
+                                    <a class="text-gray-500 hover:text-primary transition-colors text-sm" href="#">Help Center</a>
+                                    <a class="text-gray-500 hover:text-primary transition-colors text-sm" href="#">Contact Us</a>
+                                    <a class="text-gray-500 hover:text-primary transition-colors text-sm" href="#">Privacy Policy</a>
+                                    <a class="text-gray-500 hover:text-primary transition-colors text-sm" href="#">Terms of Service</a>
+                                </nav>
+                            </div>
+                        </div>
+                        <div class="col-span-1">
+                            <h4 class="font-bold text-sm uppercase tracking-wider mb-4">Newsletter</h4>
+                            <p class="text-gray-500 text-sm mb-4">Get travel inspiration and deals directly in your inbox.</p>
+                            <div class="flex flex-col gap-2">
+                                <input class="rounded-lg border-gray-200 dark:border-gray-800 dark:bg-background-dark dark:text-white focus:ring-primary focus:border-primary px-4 py-2 text-sm"
+                                       placeholder="Your email address" type="email" />
+                                <button class="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:brightness-110 transition-all text-sm">
+                                    Subscribe
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p class="text-gray-400 text-xs">© 2024 Wanderlust Travel Technologies Inc. All rights reserved.</p>
+                        <div class="flex gap-6 text-gray-400">
+                            <a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-xl">social_leaderboard</span></a>
+                            <a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-xl">camera</span></a>
+                            <a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-xl">share</span></a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+    </div>
+</div>

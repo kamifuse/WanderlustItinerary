@@ -1,0 +1,109 @@
+﻿@page "/customer/bookings"
+@inject NavigationManager Nav
+
+
+<section>
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold text-text-light dark:text-text-dark font-display">
+            Upcoming Bookings
+        </h3>
+
+        <a class="text-sm font-medium text-primary hover:text-opacity-80 flex items-center cursor-pointer"
+           @onclick="@(() => Nav.NavigateTo("/customer/bookings"))">
+            View all <span class="material-icons text-sm ml-1">arrow_forward</span>
+        </a>
+    </div>
+
+    <!-- Main highlighted booking card -->
+    <div class="bg-card-light dark:bg-card-dark rounded-xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 transition hover:shadow-xl group">
+        <div class="md:flex">
+            <div class="md:flex-shrink-0 relative overflow-hidden md:w-48">
+                <img class="h-48 w-full object-cover md:w-48 md:h-full transform group-hover:scale-105 transition-transform duration-500"
+                     alt="Scenic view of Kyoto traditional streets"
+                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeJX_sXaE-8IqFtIgQiv44xDB0XMr1qLUcL-w1PyaSL-FR7Lv4LQXdstTcd55xm7mHbAEoTgTnVDuuNN7XHVyorG2bK7wbVvgjNQ1w-Ca3HM8ueekHKoEJAmK_vGmvkEi5oqngyxywEk-exchliQjJNS8fNyok4gAv9p9-j663OA8vglkb27-Qyl0cinncGPOOL3hRdLy2ROykKPNMifIDE5vI6ZfZ7idRyFe9GHGhHbpuhHdEnUbhQUqL4Q-T2ypjEbzuwS1Vyu4" />
+                <div class="absolute top-0 left-0 m-2 bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-md uppercase tracking-wide">
+                    Confirmed
+                </div>
+            </div>
+
+            <div class="p-6 w-full flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="uppercase tracking-wide text-sm text-primary font-bold">
+                                Cultural Heritage Tour
+                            </div>
+                            <h4 class="block mt-1 text-2xl leading-tight font-bold text-text-light dark:text-text-dark hover:underline">
+                                Kyoto, Japan
+                            </h4>
+                        </div>
+
+                        <div class="text-right hidden sm:block">
+                            <p class="text-2xl font-bold text-text-light dark:text-text-dark">$1,299</p>
+                            <p class="text-xs text-muted-light dark:text-muted-dark">Paid in full</p>
+                        </div>
+                    </div>
+
+                    <p class="mt-2 text-muted-light dark:text-muted-dark">
+                        Experience the ancient temples, traditional tea ceremonies, and breathtaking bamboo forests.
+                    </p>
+
+                    <div class="mt-4 flex flex-wrap gap-4 text-sm text-muted-light dark:text-muted-dark">
+                        <div class="flex items-center">
+                            <span class="material-icons text-gray-400 mr-1 text-lg">calendar_today</span>
+                            Oct 15 - Oct 22, 2023
+                        </div>
+                        <div class="flex items-center">
+                            <span class="material-icons text-gray-400 mr-1 text-lg">people</span>
+                            2 Adults
+                        </div>
+                        <div class="flex items-center">
+                            <span class="material-icons text-gray-400 mr-1 text-lg">confirmation_number</span>
+                            #WL-88329
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex space-x-3">
+                    <button class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition shadow-sm"
+                            @onclick="@(() => Nav.NavigateTo("/customer/itinerary/WL-88329"))">
+                        View Itinerary
+                    </button>
+
+                    <button class="bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                            @onclick="@(() => Nav.NavigateTo("/customer/ticket/WL-88329"))">
+                        Download Ticket
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary booking row -->
+    <div class="mt-4 bg-card-light dark:bg-card-dark rounded-lg shadow border border-gray-100 dark:border-gray-700 p-4 flex flex-col sm:flex-row items-center justify-between">
+        <div class="flex items-center w-full sm:w-auto mb-4 sm:mb-0">
+            <div class="h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 mr-4">
+                <span class="material-icons">flight</span>
+            </div>
+            <div>
+                <h5 class="text-md font-bold text-text-light dark:text-text-dark">Weekend in Paris</h5>
+                <p class="text-sm text-muted-light dark:text-muted-dark">
+                    Nov 10 - Nov 12, 2023 •
+                    <span class="text-yellow-600 dark:text-yellow-400 font-medium">Payment Pending</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center w-full sm:w-auto justify-end">
+            <button class="text-sm text-primary font-medium hover:underline mr-4"
+                    @onclick="@(() => Nav.NavigateTo("/customer/bookings"))">
+                Manage
+            </button>
+
+            <button class="bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600"
+                    @onclick="@(() => Nav.NavigateTo("/customer/payments"))">
+                Pay Now
+            </button>
+        </div>
+    </div>
+</section>

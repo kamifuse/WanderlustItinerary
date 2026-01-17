@@ -1,6 +1,5 @@
 ﻿@page "/bookings"
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using WanderlustItinerary.Domain
@@ -14,31 +13,118 @@
 
 <PageTitle>Bookings</PageTitle>
 
-<h1>Bookings</h1>
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-<p>
-    <a href="bookings/create">Create New</a>
-</p>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-text-light dark:text-text-dark font-display">
+                Upcoming Bookings
+            </h1>
+            <p class="mt-1 text-sm text-muted-light dark:text-muted-dark">
+                View and manage your upcoming trips.
+            </p>
+        </div>
 
-<QuickGrid Class="table" Items="filteredBookings">
-    <PropertyColumn Property="booking => booking.Package!.PackageName" Title="Package" />
-    <PropertyColumn Property="booking => booking.Date" />
-    <PropertyColumn Property="booking => booking.NumPax" />
-    <PropertyColumn Property="booking => booking.Status" />
+        <a href="bookings/create"
+           class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm
+                  text-sm font-medium text-white bg-primary hover:opacity-90
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+            <span class="material-icons text-sm mr-2">add</span>
+            Create New
+        </a>
+    </div>
 
-    <TemplateColumn Context="booking">
-        <a href="@($"bookings/edit?id={booking.Id}")">Edit</a> |
-        <a href="@($"bookings/details?id={booking.Id}")">Details</a>
+    @if (!upcomingBookings.Any())
+    {
+        <div class="bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center">
+            <p class="text-sm text-muted-light dark:text-muted-dark">
+                You have no upcoming bookings.
+            </p>
+            <a href="bookings/create"
+               class="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm
+                          text-sm font-medium text-white bg-primary hover:opacity-90">
+                <span class="material-icons text-sm mr-2">add</span>
+                Create your first booking
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var booking in upcomingBookings)
+            {
+                var statusColor = booking.Status?.ToLower() switch
+                {
+                    "pending" => "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/40",
+                    "confirmed" => "text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/40",
+                    "cancelled" => "text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/40",
+                    _ => "text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/60"
+                };
 
-        <AuthorizeView Roles="Administrator">
-            | <a href="@($"bookings/delete?id={booking.Id}")">Delete</a>
-        </AuthorizeView>
-    </TemplateColumn>
-</QuickGrid>
+                <div class="bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700
+                                    rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
+                    <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <!-- Left: Package + details -->
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-1">
+                                <h2 class="text-lg font-semibold text-text-light dark:text-text-dark">
+                                    @booking.Package?.PackageName
+                                </h2>
+
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                                     @statusColor">
+                                    @booking.Status
+                                </span>
+                            </div>
+
+                            <div class="flex flex-wrap gap-4 text-xs sm:text-sm text-muted-light dark:text-muted-dark mt-1">
+                                <div class="flex items-center">
+                                    <span class="material-icons text-xs mr-1.5 text-gray-400">calendar_today</span>
+                                    @booking.Date.ToString("dd/MM/yyyy hh:mm tt")
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="material-icons text-xs mr-1.5 text-gray-400">people</span>
+                                    @booking.NumPax pax
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(booking.CreatedBy))
+                                {
+                                    <div class="flex items-center">
+                                        <span class="material-icons text-xs mr-1.5 text-gray-400">person</span>
+                                        Booked by: @booking.CreatedBy
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Right: Actions -->
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <a href="@($"bookings/details?id={booking.Id}")"
+                               class="text-sm text-primary font-medium hover:underline">
+                                Details
+                            </a>
+
+                            <a href="@($"bookings/edit?id={booking.Id}")"
+                               class="text-sm text-muted-light dark:text-muted-dark hover:text-primary dark:hover:text-primary">
+                                Edit
+                            </a>
+
+                            <AuthorizeView Roles="Administrator">
+                                <a href="@($"bookings/delete?id={booking.Id}")"
+                                   class="text-sm text-red-600 dark:text-red-400 hover:underline">
+                                    Delete
+                                </a>
+                            </AuthorizeView>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
 
 @code {
     private WanderlustItineraryContext context = default!;
-    private IQueryable<Booking> filteredBookings = Enumerable.Empty<Booking>().AsQueryable();
+    private List<Booking> upcomingBookings = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,7 +144,13 @@
             query = query.Where(b => b.CreatedBy == userId);
         }
 
-        filteredBookings = query;
+        var today = DateTime.Today;
+
+        // Only show upcoming bookings, ordered by date
+        upcomingBookings = await query
+            .Where(b => b.Date >= today)
+            .OrderBy(b => b.Date)
+            .ToListAsync();
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

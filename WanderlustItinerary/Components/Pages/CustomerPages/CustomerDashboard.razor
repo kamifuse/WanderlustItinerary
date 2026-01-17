@@ -1,0 +1,313 @@
+﻿@page "/customer/dashboard"
+
+
+@using System.Linq
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using WanderlustItinerary.Domain
+@using WanderlustItinerary.Data
+
+
+@inject IDbContextFactory<WanderlustItineraryContext> DbFactory
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<IdentityUser> UserManager
+
+@attribute [Authorize]
+
+@if (!Loaded)
+{
+    <div class="min-h-screen flex items-center justify-center">
+        <p class="text-gray-500">Loading dashboard...</p>
+    </div>
+}
+else
+{
+    <div class="min-h-screen bg-gray-50 text-gray-900">
+
+        <!-- NAV -->
+        <nav class="sticky top-0 z-50 bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center gap-2 cursor-pointer" @onclick="GoHome">
+                        <span class="material-icons text-3xl text-sky-600">flight_takeoff</span>
+                        <span class="text-xl font-bold">Wanderlust</span>
+                    </div>
+
+                    <div class="hidden sm:flex items-center gap-6">
+                        <a class="text-sm font-medium text-sky-700" href="/dashboard">Dashboard</a>
+                        <a class="text-sm font-medium text-gray-600 hover:text-gray-900" href="/explore">Packages</a>
+                        <a class="text-sm font-medium text-gray-600 hover:text-gray-900" href="/bookings">My Bookings</a>
+
+                        <button class="bg-sky-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-sky-700"
+                                @onclick="GoToExplore">
+                            New Booking
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- MAIN -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="flex items-start justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold">Welcome back, @DisplayName!</h2>
+                    <p class="text-sm text-gray-500 mt-1">Manage your bookings and profile below.</p>
+                </div>
+
+                <div class="hidden sm:flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-full bg-sky-600 text-white flex items-center justify-center font-semibold">
+                        @UserInitials
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+
+                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 rounded-md bg-sky-50">
+                            <span class="material-icons text-sky-600">upcoming</span>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Upcoming Trip</div>
+                            <div class="text-lg font-semibold">@UpcomingTripTitle</div>
+                            <div class="text-xs text-gray-500">@UpcomingTripSub</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 rounded-md bg-blue-50">
+                            <span class="material-icons text-blue-600">flight_land</span>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Total Trips</div>
+                            <div class="text-lg font-semibold">@TotalTrips</div>
+                            <div class="text-xs text-gray-500">@UpcomingBookings.Count upcoming</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 rounded-md bg-purple-50">
+                            <span class="material-icons text-purple-600">loyalty</span>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Loyalty Points</div>
+                            <div class="text-lg font-semibold">@LoyaltyPoints pts</div>
+                            <div class="text-xs text-gray-500">@LoyaltyTier</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 rounded-md bg-yellow-50">
+                            <span class="material-icons text-yellow-600">history</span>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Past Trips</div>
+                            <div class="text-lg font-semibold">@PastBookings.Count</div>
+                            <div class="text-xs text-gray-500">Completed</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CONTENT -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                <!-- LEFT -->
+                <div class="lg:col-span-2 space-y-8">
+
+                    <section>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold">Upcoming Bookings</h3>
+                            <a class="text-sm text-sky-700 hover:underline" href="/bookings">View all</a>
+                        </div>
+
+                        @if (UpcomingBookings.Count == 0)
+                        {
+                            <div class="bg-white border border-gray-200 rounded-lg p-5 text-gray-600">
+                                No upcoming bookings. Go to <a class="text-sky-700 hover:underline" href="/explore">Explore</a> to book a package.
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var b in UpcomingBookings.Take(3))
+                            {
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between mb-3">
+                                    <div>
+                                        <div class="font-semibold">@b.Package?.PackageName</div>
+                                        <div class="text-sm text-gray-500">@b.Date.ToString("dd MMM yyyy") • @b.NumPax pax • @b.Status</div>
+                                    </div>
+                                    <button class="text-sky-700 text-sm font-medium hover:underline"
+                                            @onclick="() => OpenBookingDetails(b.Id)">
+                                        Details
+                                    </button>
+                                </div>
+                            }
+                        }
+                    </section>
+
+                    <section>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold">Past Adventures</h3>
+                            <a class="text-sm text-sky-700 hover:underline" href="/bookings">History</a>
+                        </div>
+
+                        @if (PastBookings.Count == 0)
+                        {
+                            <div class="bg-white border border-gray-200 rounded-lg p-5 text-gray-600">
+                                No past trips yet.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                <ul class="divide-y divide-gray-200">
+                                    @foreach (var b in PastBookings.Take(5))
+                                    {
+                                        <li class="p-4 flex items-center justify-between">
+                                            <div>
+                                                <div class="font-semibold text-sky-700">@b.Package?.PackageName</div>
+                                                <div class="text-sm text-gray-500">@b.Date.ToString("dd MMM yyyy") • @b.NumPax pax</div>
+                                            </div>
+                                            <button class="text-sky-700 text-sm font-medium hover:underline"
+                                                    @onclick="() => OpenBookingDetails(b.Id)">
+                                                Details
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </section>
+
+                </div>
+
+                <!-- RIGHT -->
+                <div class="space-y-6">
+                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                        <h3 class="text-lg font-bold mb-4">My Profile</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="h-14 w-14 rounded-full bg-sky-600 text-white flex items-center justify-center text-lg font-semibold">
+                                @UserInitials
+                            </div>
+                            <div>
+                                <div class="font-semibold">@DisplayName</div>
+                                <div class="text-sm text-gray-500">@UserEmail</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 space-y-2 text-sm">
+                            <div class="flex justify-between border-t pt-3">
+                                <span class="text-gray-500">Total trips</span>
+                                <span class="font-medium">@TotalTrips</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Completed</span>
+                                <span class="font-medium">@PastBookings.Count</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Tier</span>
+                                <span class="font-medium">@LoyaltyTier</span>
+                            </div>
+                        </div>
+
+                        <button class="w-full mt-5 bg-sky-50 text-sky-700 font-medium py-2 rounded-md hover:bg-sky-100">
+                            Edit Profile
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+}
+
+@code {
+    private bool Loaded;
+
+    private string DisplayName = "Traveler";
+    private string UserEmail = "";
+    private string UserInitials = "U";
+
+    private List<Booking> UpcomingBookings { get; set; } = new();
+    private List<Booking> PastBookings { get; set; } = new();
+
+    private int TotalTrips => UpcomingBookings.Count + PastBookings.Count;
+
+    private int LoyaltyPoints => PastBookings.Count * 150;
+
+    private string LoyaltyTier =>
+        LoyaltyPoints < 500 ? "Bronze Member" :
+        LoyaltyPoints < 1500 ? "Silver Member" :
+        LoyaltyPoints < 3000 ? "Gold Member" :
+        "Platinum Member";
+
+    private string UpcomingTripTitle = "None yet";
+    private string UpcomingTripSub = "Book a package to begin";
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = UserManager.GetUserId(user);
+
+        DisplayName = user.Identity?.Name ?? "Traveler";
+        UserEmail = user.Identity?.Name ?? "";
+
+        var parts = DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) UserInitials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        else if (parts.Length == 1) UserInitials = $"{parts[0][0]}".ToUpper();
+
+        var today = DateTime.Today;
+
+        var q = context.Booking
+            .Include(b => b.Package)
+            .Where(b => b.UserId == userId);
+
+        UpcomingBookings = await q
+            .Where(b => b.Date >= today)
+            .OrderBy(b => b.Date)
+            .ToListAsync();
+
+        PastBookings = await q
+            .Where(b => b.Date < today)
+            .OrderByDescending(b => b.Date)
+            .ToListAsync();
+
+        // Fill "Upcoming Trip" card
+        var next = UpcomingBookings.FirstOrDefault();
+        if (next != null)
+        {
+            UpcomingTripTitle = next.Package?.PackageName ?? "Upcoming Trip";
+            var days = (next.Date.Date - today).Days;
+
+            if (days <= 0) UpcomingTripSub = "Trip is today";
+            else if (days == 1) UpcomingTripSub = "In 1 day";
+            else UpcomingTripSub = $"In {days} days";
+        }
+
+        Loaded = true;
+    }
+
+    private void GoHome() => Nav.NavigateTo("/");
+
+    private void GoToExplore() => Nav.NavigateTo("/explore");
+
+    private void OpenBookingDetails(int id)
+    {
+        Nav.NavigateTo($"/bookings/details?id={id}");
+    }
+}

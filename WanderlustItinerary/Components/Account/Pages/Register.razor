@@ -1,61 +1,237 @@
 ﻿@page "/Account/Register"
 
 @using System.ComponentModel.DataAnnotations
-@using System.Text
-@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
 @using WanderlustItinerary.Data
 
 @inject UserManager<IdentityUser> UserManager
-@inject IUserStore<IdentityUser> UserStore
 @inject SignInManager<IdentityUser> SignInManager
-@inject IEmailSender<IdentityUser> EmailSender
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
+@attribute [AllowAnonymous]
+
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<div class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-300">
 
-<div class="row">
-    <div class="col-md-4">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
-            <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
+    <!-- Top nav (optional, matches your HTML) -->
+    <nav class="bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a class="flex-shrink-0 flex items-center gap-2" href="/">
+                        <span class="material-icons text-primary text-3xl">flight_takeoff</span>
+                        <span class="font-display font-bold text-2xl text-slate-900 dark:text-white tracking-tight">Wanderlust</span>
+                    </a>
+                </div>
+
+                <div class="hidden sm:flex items-center space-x-3">
+                    <a class="text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                       href="/Account/Login">
+                        Login
+                    </a>
+                    <a class="bg-primary text-white hover:bg-teal-800 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm shadow-teal-500/30"
+                       href="/Account/Register">
+                        Sign Up
+                    </a>
+                </div>
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+
+        <!-- Background blobs -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-teal-200/20 dark:bg-teal-900/10 rounded-full blur-3xl"></div>
+            <div class="absolute top-1/2 -right-24 w-80 h-80 bg-amber-200/20 dark:bg-amber-900/10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-1/3 w-64 h-64 bg-cyan-200/20 dark:bg-cyan-900/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 bg-surface-light dark:bg-surface-dark rounded-2xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 relative z-10 min-h-[620px]">
+
+            <!-- Left image panel -->
+            <div class="hidden lg:flex flex-col relative bg-slate-900">
+                <img class="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-overlay"
+                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYw0UhN3jfwq_TcNQpGZ98fvHjcg66hsxlQoucCCeAQfO8gsIr7OrVfqzR8QPWD_1L9XU0EVFuME2nP4FKH7a6vrMprKHmwq3_J59csVfQ4zPetDFpr6wZTdRSVu-HfEzj3bNcuhJE5C4Vhr00hY3BLPOpXXLCLPbtyymCKYF-OvKPvQdxVpPmymlWFSEwYNzfgrNZegxP5KH0l-wEnacyckl2J2OdmoC7YM1UQHIPEOU1gRXvj-ETRnOctfDFpxy7HxHdSfYzc_o"
+                     alt="Scenic mountain landscape with a traveler" />
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
+
+                <div class="relative z-10 flex flex-col justify-end h-full p-12 text-white">
+                    <span class="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 mb-6 shadow-lg">
+                        <span class="material-icons text-white">explore</span>
+                    </span>
+                    <h2 class="font-display text-4xl font-bold mb-4 leading-tight">Start Your Journey With Us</h2>
+                    <p class="text-slate-200 text-lg leading-relaxed max-w-md">
+                        Join thousands of travelers planning their perfect getaways. Book packages and explore with ease.
+                    </p>
+
+                    <div class="flex items-center gap-4 mt-10 pt-8 border-t border-white/10">
+                        <div class="flex -space-x-3">
+                            <img class="w-10 h-10 rounded-full border-2 border-slate-900"
+                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuARDB-diw52Q7CpW_N8D3IJDlUFGTS7bY_y2c4Be1C7TTkD6A0cljoIA1LQLdCkI_bSbeuTiqjD0O2WXAi8KAeCDRf0bnHt_mGa09wy31uM7KlGgFoV1g8kILL-72rUYTU4Wa9S81lX23o-Ff-i3Ax7N90nPteEfHrgDDXGgMH-W5kTT_9f6T9BrYnI0BAtl44BS--KduXWY9eUt-scGoAa7vFgVQRkpn6OOgGE4AfWbuTTaK3QNS-yZ-wxL4D93_IPBYEsco25-AE"
+                                 alt="User avatar" />
+                            <img class="w-10 h-10 rounded-full border-2 border-slate-900"
+                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaC3pO_qihljZeJqcuRhBV9-Bmq5IVbaQ3xFnUGnWMNN9DGZE8drHeV9cx8XFYeMh3PmdMuVmKPOmC1To8zwTh-H7RmmK3qGNamK3yUmTfnoJkFbgr-7M5QbA6H2gaYHaEILf1r-wWmqXfTBFym9fsj7SB2HKfA9U_vOIJBjzJKvpPrSB-Fn5RIAjkw5FT4rn1wWUn1go78cBplMGac0EDGRYD6M3iJzhykdp1G5uPsvoS98y9olv4peWOdE5v63V9Nu2LsaySmkw"
+                                 alt="User avatar" />
+                            <img class="w-10 h-10 rounded-full border-2 border-slate-900"
+                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiQVPMCpWbcndfLvI_f8oUmoyrdoyDAOHwN5dw0RkmtapRsO8t0aoZp67B-P0VXYh37QLHRAWpHebWhrqSQn0Tj7z474qkidh1nt6jAMOjmcIsKCiHdmql-vIivkYDZs9YNexLqS488Ln0AfU6YAqOQORSo9Kc3D3R-z10qqNt74YfhwIASqDTqRA7d7wMA9HRy3cDdZMHiqFl0H7wVJ6iKLqXmJylVKkvqoMpSD3l1_hPap67b8LRSfVgNVeSX945FlBrgXMURNQ"
+                                 alt="User avatar" />
+                            <div class="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 text-xs flex items-center justify-center font-bold text-white">+2k</div>
+                        </div>
+                        <p class="text-sm font-medium text-slate-300">Travelers joined last month</p>
+                    </div>
+                </div>
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="confirm-password">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+
+            <!-- Right form panel -->
+            <div class="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
+
+                <div class="mb-8">
+                    <h1 class="font-display text-3xl font-bold text-slate-900 dark:text-white mb-2">Create an account</h1>
+                    <p class="text-slate-500 dark:text-slate-400">
+                        Already have an account?
+                        <a class="font-semibold text-primary hover:text-teal-800 dark:hover:text-teal-400 transition-colors"
+                           href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                            Log in
+                        </a>
+                    </p>
+                </div>
+
+                <StatusMessage Message="@errorMessage" />
+
+                <!-- External Login -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <ExternalLoginPicker />
+                </div>
+
+                <div class="relative mb-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-surface-light dark:bg-surface-dark text-slate-500">Or register with email</span>
+                    </div>
+                </div>
+
+                <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register" class="space-y-5">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-red-500 text-sm" role="alert" />
+
+                    <!-- Full Name (not stored by default) -->
+                    <div class="space-y-1">
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="name">Full Name</label>
+                        <div class="relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-icons text-slate-400 text-lg">person_outline</span>
+                            </div>
+                            <InputText id="name" @bind-Value="Input.FullName"
+                                       class="block w-full pl-10 pr-4 py-3 rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-800/50 dark:text-white text-slate-900 focus:ring-primary focus:border-primary sm:text-sm shadow-sm"
+                                       placeholder="John Doe" />
+                        </div>
+                        <ValidationMessage For="() => Input.FullName" class="text-red-500 text-sm" />
+                    </div>
+
+                    <!-- Email -->
+                    <div class="space-y-1">
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="email">Email Address</label>
+                        <div class="relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-icons text-slate-400 text-lg">mail_outline</span>
+                            </div>
+                            <InputText id="email" @bind-Value="Input.Email"
+                                       class="block w-full pl-10 pr-4 py-3 rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-800/50 dark:text-white text-slate-900 focus:ring-primary focus:border-primary sm:text-sm shadow-sm"
+                                       autocomplete="username" aria-required="true"
+                                       placeholder="you@example.com" />
+                        </div>
+                        <ValidationMessage For="() => Input.Email" class="text-red-500 text-sm" />
+                    </div>
+
+                    <!-- Password -->
+                    <div class="space-y-1">
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="password">Password</label>
+                        <div class="relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-icons text-slate-400 text-lg">lock_outline</span>
+                            </div>
+
+                            <InputText id="password"
+                                       type="@(showPassword ? "text" : "password")"
+                                       @bind-Value="Input.Password"
+                                       class="block w-full pl-10 pr-10 py-3 rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-800/50 dark:text-white text-slate-900 focus:ring-primary focus:border-primary sm:text-sm shadow-sm"
+                                       autocomplete="new-password" aria-required="true"
+                                       placeholder="Min. 8 characters" />
+
+                            <button type="button"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                    @onclick="TogglePassword">
+                                <span class="material-icons text-[20px]">
+                                    @(showPassword ? "visibility" : "visibility_off")
+                                </span>
+                            </button>
+                        </div>
+                        <ValidationMessage For="() => Input.Password" class="text-red-500 text-sm" />
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="space-y-1">
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" for="confirm_password">Confirm Password</label>
+                        <div class="relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-icons text-slate-400 text-lg">verified_user</span>
+                            </div>
+                            <InputText id="confirm_password" type="password" @bind-Value="Input.ConfirmPassword"
+                                       class="block w-full pl-10 pr-4 py-3 rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-800/50 dark:text-white text-slate-900 focus:ring-primary focus:border-primary sm:text-sm shadow-sm"
+                                       autocomplete="new-password" aria-required="true"
+                                       placeholder="Re-enter password" />
+                        </div>
+                        <ValidationMessage For="() => Input.ConfirmPassword" class="text-red-500 text-sm" />
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="flex items-start gap-3 mt-2">
+                        <div class="flex h-5 items-center">
+                            <InputCheckbox @bind-Value="Input.AcceptTerms"
+                                           class="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary dark:bg-slate-800" />
+                        </div>
+                        <div class="text-sm text-slate-500 dark:text-slate-400 leading-5">
+                            <label class="font-medium">
+                                I agree to the
+                                <span class="text-primary underline underline-offset-2 decoration-primary/30">Terms of Service</span>
+                                and
+                                <span class="text-primary underline underline-offset-2 decoration-primary/30">Privacy Policy</span>.
+                            </label>
+                        </div>
+                    </div>
+                    <ValidationMessage For="() => Input.AcceptTerms" class="text-red-500 text-sm" />
+
+                    <!-- Submit -->
+                    <button type="submit"
+                            class="w-full flex justify-center py-3.5 px-4 rounded-lg shadow-sm text-sm font-semibold text-white bg-primary hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 transform hover:-translate-y-0.5">
+                        Create Account
+                    </button>
+                </EditForm>
+
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </EditForm>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
-    </div>
+        </div>
+
+        <div class="absolute bottom-4 left-0 w-full text-center z-20">
+            <p class="text-xs text-slate-400 dark:text-slate-500">© 2026 Wanderlust Itinerary System. All rights reserved.</p>
+        </div>
+
+    </main>
 </div>
 
 @code {
-    private IEnumerable<IdentityError>? identityErrors;
+    private string? errorMessage;
+    private bool showPassword = false;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
@@ -63,83 +239,54 @@
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
-
-    public async Task RegisterUser(EditContext editContext)
+    protected override async Task OnInitializedAsync()
     {
-        var user = CreateUser();
-
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        var emailStore = GetEmailStore();
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-        var result = await UserManager.CreateAsync(user, Input.Password);
-
-        if (!result.Succeeded)
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
-            identityErrors = result.Errors;
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+    }
+
+    private void TogglePassword() => showPassword = !showPassword;
+
+    public async Task RegisterUser()
+    {
+        if (!Input.AcceptTerms)
+        {
+            errorMessage = "Please accept the Terms of Service and Privacy Policy.";
             return;
         }
 
-        Logger.LogInformation("User created a new account with password.");
+        var user = new IdentityUser { UserName = Input.Email, Email = Input.Email };
+        var result = await UserManager.CreateAsync(user, Input.Password);
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
+        if (result.Succeeded)
         {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            Logger.LogInformation("User created a new account with password.");
+            await SignInManager.SignInAsync(user, isPersistent: false);
+            RedirectManager.RedirectTo(ReturnUrl);
+            return;
         }
 
-        await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
-    }
-
-    private IdentityUser CreateUser()
-    {
-        try
-        {
-            return Activator.CreateInstance<IdentityUser>();
-        }
-        catch
-        {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(IdentityUser)}'. " +
-                $"Ensure that '{nameof(IdentityUser)}' is not an abstract class and has a parameterless constructor.");
-        }
-    }
-
-    private IUserEmailStore<IdentityUser> GetEmailStore()
-    {
-        if (!UserManager.SupportsUserEmail)
-        {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
-        }
-        return (IUserEmailStore<IdentityUser>)UserStore;
+        errorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
     }
 
     private sealed class InputModel
     {
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
+        [Required(ErrorMessage = "Full Name is required.")]
+        public string FullName { get; set; } = "";
+
+        [Required, EmailAddress]
         public string Email { get; set; } = "";
 
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Password")]
+        [Required, DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Required, DataType(DataType.Password)]
+        [Compare(nameof(Password), ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
+
+        [Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the terms.")]
+        public bool AcceptTerms { get; set; }
     }
 }

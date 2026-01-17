@@ -1,11 +1,11 @@
-﻿@implements IDisposable
-@inject NavigationManager NavigationManager
-@using Microsoft.AspNetCore.Authorization
+﻿@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Routing
+@implements IDisposable
+@inject NavigationManager NavigationManager
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">WanderlustItinerary</a>
+        <a class="navbar-brand" href="/">WanderlustItinerary</a>
     </div>
 </div>
 
@@ -13,31 +13,68 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
+        <!-- Home -->
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
 
-        <AuthorizeView>
-            <NavLink class="nav-link" href="bookings" Match="NavLinkMatch.Prefix">
-                <span class="bi bi-card-list" aria-hidden="true"></span> Bookings
-            </NavLink>
-        </AuthorizeView>
-
+        <!-- ADMIN DASHBOARD (admins only) -->
         <AuthorizeView Roles="Administrator">
-            <NavLink class="nav-link" href="packages" Match="NavLinkMatch.Prefix">
-                <span class="bi bi-box-seam" aria-hidden="true"></span> Packages
-            </NavLink>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/admin/dashboard" Match="NavLinkMatch.All">
+                    Admin Dashboard
+                </NavLink>
+            </div>
         </AuthorizeView>
 
 
+        <!-- CUSTOMER DASHBOARD (any logged-in user) -->
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/customer/dashboard" Match="NavLinkMatch.Prefix">
+                        <span class="bi bi-speedometer2" aria-hidden="true"></span> My Dashboard
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
+        <!-- Explore (public) -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/explore" Match="NavLinkMatch.Prefix">
+                <span class="bi bi-compass" aria-hidden="true"></span> Explore
+            </NavLink>
+        </div>
+
+        <!-- Bookings (logged-in) -->
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/bookings" Match="NavLinkMatch.Prefix">
+                        <span class="bi bi-card-list" aria-hidden="true"></span> Bookings
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <!-- Packages (admin only) -->
+        <AuthorizeView Roles="Administrator">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/packages" Match="NavLinkMatch.Prefix">
+                    <span class="bi bi-box-seam" aria-hidden="true"></span> Packages
+                </NavLink>
+            </div>
+        </AuthorizeView>
+
+        <!-- Auth / Profile -->
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>
+                        @context.User.Identity?.Name
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
@@ -68,6 +105,7 @@
 
 @code {
     private string? currentUrl;
+
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
@@ -84,5 +122,4 @@
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
-
 }
