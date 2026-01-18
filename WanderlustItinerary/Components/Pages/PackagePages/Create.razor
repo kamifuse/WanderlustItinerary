@@ -66,7 +66,7 @@
     [SupplyParameterFromForm]
     private Package Package { get; set; } = new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+  
     private async Task AddPackage()
     {
         using var context = DbFactory.CreateDbContext();

@@ -1,0 +1,134 @@
+﻿@page "/explore"
+
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using WanderlustItinerary.Domain
+@using WanderlustItinerary.Data
+@using Microsoft.AspNetCore.Components.Web
+@rendermode InteractiveServer
+
+
+@inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
+
+<header class="relative bg-white pt-16 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <div class="relative z-10 max-w-7xl mx-auto text-center">
+        <h1 class="font-display text-4xl md:text-6xl font-bold text-slate-900 mb-6">
+            Discover Your Next <span class="text-primary">Adventure</span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10">
+            Explore our curated selection of breathtaking destinations and expertly crafted itineraries.
+        </p>
+
+        <!-- SEARCH BAR -->
+        <div class="bg-white p-2 rounded-2xl shadow-soft max-w-4xl mx-auto flex flex-col md:flex-row gap-2 border border-gray-100">
+            <div class="flex-1 flex items-center px-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-gray-100">
+                <span class="material-icons text-gray-400 mr-3">search</span>
+                <input class="w-full bg-transparent border-none focus:ring-0 text-slate-700 placeholder-gray-400"
+                       placeholder="Where do you want to go?"
+                       @bind="searchText"
+                       @bind:event="oninput"
+                       @onkeydown="OnKeyDown" />
+            </div>
+            <button class="bg-primary hover:bg-sky-600 text-white px-8 py-3 rounded-xl font-bold transition shadow-md"
+                    @onclick="ApplySearch">
+                Search
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- PACKAGES GRID -->
+<main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20 pb-20">
+
+    @if (!Loaded)
+    {
+        <p class="text-center text-slate-500 mt-10">Loading packages...</p>
+    }
+    else if (FilteredPackages.Count == 0)
+    {
+        <p class="text-center text-slate-500 mt-10">No packages found.</p>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach (var p in FilteredPackages)
+            {
+                <div class="group bg-white rounded-2xl overflow-hidden shadow-soft hover:shadow-soft-hover transition-all duration-300 border border-gray-100 flex flex-col">
+                    <!-- Simple banner -->
+                    <div class="h-32 bg-gradient-to-r from-sky-400 to-indigo-500"></div>
+
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="font-display text-xl font-bold text-slate-900 mb-2 group-hover:text-primary transition-colors">
+                            @p.PackageName
+                        </h3>
+
+                        <p class="text-sm text-slate-600 mb-6 line-clamp-3">
+                            @p.Description
+                        </p>
+
+                        <div class="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
+                            <div>
+                                <p class="text-xs text-slate-500">From</p>
+                                <p class="text-xl font-bold text-slate-900">
+                                    @p.Price.ToString("C0")
+                                </p>
+                            </div>
+
+                            <a class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg text-primary bg-sky-50 hover:bg-sky-100 transition-colors"
+                               href="@($"/package-details?id={p.Id}")">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</main>
+
+@code {
+    private List<Package> AllPackages = new();
+    private List<Package> FilteredPackages = new();
+    private bool Loaded = false;
+    private string searchText = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = await DbFactory.CreateDbContextAsync();
+
+        // load all packages from DB once
+        AllPackages = await context.Package.ToListAsync();
+
+        // initial view = all
+        FilteredPackages = AllPackages;
+
+        Loaded = true;
+    }
+
+    private void ApplySearch()
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            FilteredPackages = AllPackages;
+        }
+        else
+        {
+            var term = searchText.Trim().ToLower();
+
+            FilteredPackages = AllPackages
+                .Where(p =>
+                    (!string.IsNullOrEmpty(p.PackageName) && p.PackageName.ToLower().Contains(term)) ||
+                    (!string.IsNullOrEmpty(p.Description) && p.Description.ToLower().Contains(term)))
+                .ToList();
+        }
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            ApplySearch();
+        }
+    }
+}

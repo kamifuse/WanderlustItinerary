@@ -1,76 +1,338 @@
 ﻿@page "/bookings/create"
+
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Forms
 @using WanderlustItinerary.Domain
-@inject IDbContextFactory<WanderlustItinerary.Data.WanderlustItineraryContext> DbFactory
+@using WanderlustItinerary.Data
+
+@inject IDbContextFactory<WanderlustItineraryContext> DbFactory
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
 @inject UserManager<IdentityUser> UserManager
 
 @attribute [Authorize]
 
-<PageTitle>Create</PageTitle>
+@* ---------- Tailwind + config ---------- *@
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    primary: "#0EA5E9",
+                    "primary-dark": "#0284C7",
+                    "background-light": "#F8FAFC",
+                    "background-dark": "#0F172A",
+                    "surface-light": "#FFFFFF",
+                    "surface-dark": "#1E293B",
+                    "text-light": "#334155",
+                    "text-dark": "#E2E8F0",
+                },
+                fontFamily: {
+                    sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                },
+                borderRadius: {
+                    DEFAULT: "0.5rem",
+                },
+            },
+        },
+    };
+</script>
 
-<h1>Create</h1>
-
-<h2>Booking</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <EditForm method="post" Model="Booking" OnValidSubmit="AddBooking" FormName="create" Enhance>
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
-
-            <div class="mb-3">
-                <label for="packageid" class="form-label">Package:</label>
-                <InputSelect id="packageid" @bind-Value="Booking.PackageId" class="form-control">
-                    <option value="">-- Select Package --</option>
-                    @foreach (var p in Packages)
-                    {
-                        <option value="@p.Id">@p.PackageName</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="() => Booking.PackageId" class="text-danger" />
-            </div>
-
-            <div class="mb-3">
-                <label for="date" class="form-label">Date:</label>
-                <InputDate id="date" @bind-Value="Booking.Date" class="form-control" />
-                <ValidationMessage For="() => Booking.Date" class="text-danger" />
-            </div>
-
-            <div class="mb-3">
-                <label for="numpax" class="form-label">NumPax:</label>
-                <InputNumber id="numpax" @bind-Value="Booking.NumPax" class="form-control" />
-                <ValidationMessage For="() => Booking.NumPax" class="text-danger" />
-            </div>
-
-            <div class="mb-3">
-                <label for="status" class="form-label">Status:</label>
-                <InputText id="status" @bind-Value="Booking.Status" class="form-control" />
-                <ValidationMessage For="() => Booking.Status" class="text-danger" />
-            </div>
-
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
+@if (SelectedPackage is null)
+{
+    <div class="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <p class="text-text-light dark:text-text-dark text-lg">
+            Loading package details...
+        </p>
     </div>
-</div>
+}
+else
+{
+    <div class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
 
-<div>
-    <a href="/bookings">Back to List</a>
-</div>
+        @* ================= NAVBAR ================= *@
+        <nav class="sticky top-0 z-50 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <a class="flex items-center gap-2 cursor-pointer" @onclick="BackToPackage">
+                            <span class="material-icons-round text-primary text-3xl">flight_takeoff</span>
+                            <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Wanderlust</span>
+                        </a>
+                    </div>
+                    <div class="hidden sm:flex items-center space-x-8">
+                        <a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium text-sm transition-colors" href="/explore">Packages</a>
+                        <a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary font-medium text-sm transition-colors" href="#">My Itineraries</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        @* ================= MAIN CONTENT ================= *@
+        <main class="flex-grow py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-6xl mx-auto">
+
+                @* ----- Breadcrumb ----- *@
+                <nav aria-label="Breadcrumb" class="flex mb-8">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-white"
+                               href="/">
+                                <span class="material-icons-round text-base mr-2">home</span>
+                                Home
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <span class="material-icons-round text-slate-400 mx-1">chevron_right</span>
+                                <a class="text-sm font-medium text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-white"
+                                   href="/explore">Packages</a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <span class="material-icons-round text-slate-400 mx-1">chevron_right</span>
+                                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">@SelectedPackage.PackageName</span>
+                            </div>
+                        </li>
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <span class="material-icons-round text-slate-400 mx-1">chevron_right</span>
+                                <span class="text-sm font-medium text-slate-900 dark:text-white">Booking</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    @* ================= LEFT: FORM ================= *@
+                    <div class="lg:col-span-2">
+
+                        <EditForm Model="Booking"
+                                  OnValidSubmit="AddBooking"
+                            FormName="bookingCreate"
+                            method="post"
+                            Enhance>
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-red-500 mb-4" />
+
+                            <div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                @* Step header *@
+                                <div class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 p-6">
+                                    <div class="flex items-center justify-between relative">
+                                        <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-slate-200 dark:bg-slate-700 z-0"></div>
+                                        <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1/2 h-1 bg-primary z-0 transition-all duration-500"></div>
+
+                                        <div class="relative z-10 flex flex-col items-center">
+                                            <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-primary/30">
+                                                <span class="material-icons-round text-base">check</span>
+                                            </div>
+                                            <span class="mt-2 text-xs font-semibold text-primary">Details</span>
+                                        </div>
+                                        <div class="relative z-10 flex flex-col items-center">
+                                            <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-primary/30 ring-4 ring-white dark:ring-surface-dark">
+                                                2
+                                            </div>
+                                            <span class="mt-2 text-xs font-semibold text-primary">Travelers</span>
+                                        </div>
+                                        <div class="relative z-10 flex flex-col items-center">
+                                            <div class="w-8 h-8 rounded-full bg-surface-light dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 flex items-center justify-center font-bold text-sm">
+                                                3
+                                            </div>
+                                            <span class="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">Payment</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @* Form body *@
+                                <div class="p-6 md:p-8 space-y-8">
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                                            <span class="material-icons-round text-primary">group_add</span>
+                                            Traveler Information
+                                        </h2>
+                                        <p class="mt-1 text-slate-500 dark:text-slate-400">
+                                            Please provide details for your trip.
+                                        </p>
+                                    </div>
+
+                                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div class="col-span-1">
+                                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                    Travel Date
+                                                </label>
+                                                <InputDate @bind-Value="Booking.Date"
+                                                           class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm" />
+                                                <ValidationMessage For="() => Booking.Date"
+                                                                   class="text-xs text-red-500 mt-1" />
+                                            </div>
+
+                                            <div class="col-span-1">
+                                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                    Number of Travelers
+                                                </label>
+                                                <InputNumber @bind-Value="Booking.NumPax"
+                                                             class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm" />
+                                                <ValidationMessage For="() => Booking.NumPax"
+                                                                   class="text-xs text-red-500 mt-1" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="border-t border-slate-200 dark:border-slate-700 pt-6">
+                                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Special Requests</h3>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                            (Optional) dietary requirements, accessibility needs, etc.
+                                        </label>
+                                        <textarea class="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                                              rows="3"></textarea>
+                                    </div>
+
+                                    <div class="flex items-center justify-between pt-6 border-t border-slate-200 dark:border-slate-700">
+                                        <button type="button"
+                                                @onclick="BackToPackage"
+                                                class="inline-flex items-center px-6 py-3 border border-slate-300 dark:border-slate-600 shadow-sm text-base font-medium rounded-lg text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                            Back
+                                        </button>
+
+                                        <button type="submit"
+                                                class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                                            Confirm Booking
+                                            <span class="material-icons-round ml-2 text-sm">arrow_forward</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+
+                    @* ================= RIGHT: SUMMARY CARD ================= *@
+                    <div class="lg:col-span-1">
+                        <div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 sticky top-24">
+                            <div class="relative h-48 w-full rounded-t-2xl overflow-hidden">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-10"></div>
+                                <img alt="@SelectedPackage.PackageName"
+                                     class="w-full h-full object-cover"
+                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuANDUrLbsKVX7X_OgG7nk2IFX_1ef6I8igPRERjSCg5Tfz4q23ioCxDaDN8d2S3h6NWDzn3BOHZj-E2c-5NqYoWGkFmAWwfjfabES2OnueZ3npQ4YKpKcmtgZlxsDo63UJeSx1cAQymZvX3921EZG9T0z-qOBweWQ1OHBcSchIIIlf4MuYNB67Eb6zdu-qcfAdwGtkLLhjhZ_QnDopyUhDt-sqKfonQICdVSzXiCbJ1nwqX_Cxhhabv_uF6ki-vrBB41W6RziN4Xus" />
+                                <div class="absolute bottom-4 left-4 z-20">
+                                    <h3 class="text-white font-bold text-xl">@SelectedPackage.PackageName</h3>
+                                    <div class="flex items-center text-white/90 text-sm mt-1">
+                                        <span class="material-icons-round text-sm mr-1">location_on</span>
+                                        @SelectedPackage.Description
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-6 space-y-6">
+                                <div class="space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-primary">
+                                            <span class="material-icons-round">calendar_today</span>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Date</p>
+                                            <p class="text-sm font-semibold text-slate-900 dark:text-white">
+                                                @Booking.Date.ToShortDateString()
+                                            </p>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">Change above in the form</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-3">
+                                        <div class="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-primary">
+                                            <span class="material-icons-round">people</span>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Guests</p>
+                                            <p class="text-sm font-semibold text-slate-900 dark:text-white">
+                                                @Booking.NumPax Adult(s)
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr class="border-slate-200 dark:border-slate-700" />
+
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-3">Price Details</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-slate-600 dark:text-slate-400">
+                                                Package Base (x@Booking.NumPax)
+                                            </span>
+                                            <span class="text-slate-900 dark:text-white font-medium">
+                                                @(SelectedPackage.Price* Booking.NumPax)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr class="border-slate-200 dark:border-slate-700" />
+
+                                <div class="flex justify-between items-end">
+                                    <div>
+                                        <p class="text-sm text-slate-500 dark:text-slate-400">Total Price</p>
+                                    </div>
+                                    <span class="text-3xl font-bold text-primary">
+                                        @(SelectedPackage.Price* Booking.NumPax)
+                                    </span>
+                                </div>
+
+                                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-700/50">
+                                    <span class="material-icons-round text-green-500 text-lg">lock</span>
+                                    <span>Your booking is safe and secure.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+}
 
 @code {
-    [SupplyParameterFromForm]
-    private Booking Booking { get; set; } = new();
+    // /bookings/create?packageId=3
+    [SupplyParameterFromQuery(Name = "packageId")]
+    public int? PackageId { get; set; }
 
-    private List<Package> Packages { get; set; } = new();
+    private Booking Booking { get; set; } = new()
+    {
+        Status = "Pending",
+        Date = DateTime.Today.AddDays(7),
+        NumPax = 2
+    };
+
+    private Package? SelectedPackage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        Packages = await context.Package.ToListAsync();
+
+        if (PackageId.HasValue)
+        {
+            SelectedPackage = await context.Package.FirstOrDefaultAsync(p => p.Id == PackageId.Value);
+        }
+        else
+        {
+            SelectedPackage = await context.Package.FirstOrDefaultAsync();
+        }
+
+        if (SelectedPackage is null)
+        {
+            // No package found → go back to explore
+            NavigationManager.NavigateTo("/explore");
+            return;
+        }
+
+        Booking.PackageId = SelectedPackage.Id;
     }
 
     private async Task AddBooking()
@@ -81,7 +343,6 @@
         var user = authState.User;
         var userId = UserManager.GetUserId(user);
 
-        // Auto-fill user + audit fields (Week 7 style)
         Booking.UserId = userId;
         Booking.CreatedBy = userId;
         Booking.UpdatedBy = userId;
@@ -91,6 +352,15 @@
         context.Booking.Add(Booking);
         await context.SaveChangesAsync();
 
+        // After confirming booking, go to booking list
         NavigationManager.NavigateTo("/bookings");
+    }
+
+    private void BackToPackage()
+    {
+        if (Booking.PackageId != 0)
+            NavigationManager.NavigateTo($"/package-details?id={Booking.PackageId}");
+        else
+            NavigationManager.NavigateTo("/explore");
     }
 }

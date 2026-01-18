@@ -1,0 +1,19 @@
+﻿.glass-effect {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.bg-pattern {
+    background-color: #ffffff;
+    opacity: 0.4;
+    background-image: linear-gradient(30deg, #f1f5f9 12%, transparent 12.5%, transparent 87%, #f1f5f9 87.5%, #f1f5f9), linear-gradient(150deg, #f1f5f9 12%, transparent 12.5%, transparent 87%, #f1f5f9 87.5%, #f1f5f9), linear-gradient(30deg, #f1f5f9 12%, transparent 12.5%, transparent 87%, #f1f5f9 87.5%, #f1f5f9), linear-gradient(150deg, #f1f5f9 12%, transparent 12.5%, transparent 87%, #f1f5f9 87.5%, #f1f5f9), linear-gradient(60deg, #f8fafc 25%, transparent 25.5%, transparent 75%, #f8fafc 75%, #f8fafc), linear-gradient(60deg, #f8fafc 25%, transparent 25.5%, transparent 75%, #f8fafc 75%, #f8fafc);
+    background-size: 40px 70px;
+    background-position: 0 0, 0 0, 20px 35px, 20px 35px, 0 0, 20px 35px;
+}
+
+/* Dark mode (global .dark on <html> or <body>) */
+::deep .dark .bg-pattern {
+    background-color: #0F172A;
+    opacity: 0.05;
+    background-image: linear-gradient(30deg, #1e293b 12%, transparent 12.5%, transparent 87%, #1e293b 87.5%, #1e293b), linear-gradient(150deg, #1e293b 12%, transparent 12.5%, transparent 87%, #1e293b 87.5%, #1e293b), linear-gradient(30deg, #1e293b 12%, transparent 12.5%, transparent 87%, #1e293b 87.5%, #1e293b), linear-gradient(150deg, #1e293b 12%, transparent 12.5%, transparent 87%, #1e293b 87.5%, #1e293b), linear-gradient(60deg, #334155 25%, transparent 25.5%, transparent 75%, #334155 75%, #334155), linear-gradient(60deg, #334155 25%, transparent 25.5%, transparent 75%, #334155 75%, #334155);
+}
